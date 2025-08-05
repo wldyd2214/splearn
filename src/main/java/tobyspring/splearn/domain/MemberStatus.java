@@ -1,4 +1,5 @@
 package tobyspring.splearn.domain;
 
-public class MemberStatus {
+public enum MemberStatus {
+    PENDING;
 }
