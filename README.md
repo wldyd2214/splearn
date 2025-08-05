@@ -34,3 +34,28 @@
   - 수업과 섹션은 학습 순서를 가진다.
   - 학습 진도는 매 수업 단위로 기록된다.
   - 강의의 모든 수업의 학습을 마치고 수업 진도가 100%에 도달하면 강의 수강을 완료한 것이다.
+
+## 도메인 모델
+
+### 회원(Member)
+_Entity_
+#### 속성
+- email: 이메일 - ID
+- nickname: 닉네임
+- passwordHash: 비밀번호
+- status: 회원 상태
+#### 행위
+- constructor: 회원 생성: email, nickname, passwordHash, status
+- activate: 가입을 완료 시킨다.
+- deactivate: 탈퇴시킨다.
+#### 규칙
+- 회원 생성후 상태는 가입 대기
+- 일정 조건을 만족하면 가입 완료가 된다.
+- 가입 완료 상태에서는 탈퇴할 수 있다.
+
+### 회원 상태(MemberStatus)
+_Enum_
+#### 상수
+- PENDING: 가입 대기
+- ACTIVE: 가입 완료
+- DEACTIVATED: 탈퇴
