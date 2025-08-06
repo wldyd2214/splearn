@@ -2,7 +2,7 @@ package tobyspring.splearn.study;
 
 import org.springframework.lang.NonNull;
 
-public class NonNullRunnerTest {
+public class NonNullRunner {
     public static void main(String[] args) {
         String name = null;
         print(name);
