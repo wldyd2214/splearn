@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Getter
@@ -21,20 +22,28 @@ public class Member {
 
     @Builder(access = AccessLevel.PRIVATE)
     private Member(String email, String nickname, String passwordHash) {
-        this.email = Objects.requireNonNull(email);
-        this.nickname = Objects.requireNonNull(nickname);
-        this.passwordHash = Objects.requireNonNull(passwordHash);
+        this.email = requireNonNull(email);
+        this.nickname = requireNonNull(nickname);
+        this.passwordHash = requireNonNull(passwordHash);
 
         this.status = MemberStatus.PENDING;
     }
 
-    public static Member create(String email, String nickname, String password, PasswordEncoder passwordEncoder) {
+    public static Member create(MemberCreateCommand command, PasswordEncoder passwordEncoder) {
         return Member.builder()
-                     .email(email)
-                     .nickname(nickname)
-                     .passwordHash(passwordEncoder.encode(password))
+                     .email(command.email())
+                     .nickname(command.nickname())
+                     .passwordHash(passwordEncoder.encode(command.password()))
                      .build();
     }
+
+//    public static Member create(String email, String nickname, String password, PasswordEncoder passwordEncoder) {
+//        return Member.builder()
+//                     .email(email)
+//                     .nickname(nickname)
+//                     .passwordHash(passwordEncoder.encode(password))
+//                     .build();
+//    }
 
     public void activate() {
         state(status == MemberStatus.PENDING, "PENDING 상태가 아닙니다");
@@ -53,10 +62,14 @@ public class Member {
     }
 
     public void changeNickname(String nickname) {
-        this.nickname = nickname;
+        this.nickname = requireNonNull(nickname);
     }
 
     public void changePassword(String password, PasswordEncoder passwordEncoder) {
-        this.passwordHash = passwordEncoder.encode(password);
+        this.passwordHash = passwordEncoder.encode(requireNonNull(password));
+    }
+
+    public boolean isActive() {
+        return this.status == MemberStatus.ACTIVE;
     }
 }
