@@ -28,7 +28,7 @@ public class Member {
         this.status = MemberStatus.PENDING;
     }
 
-    public static Member create(MemberCreateCommand command, PasswordEncoder passwordEncoder) {
+    public static Member register(MemberRegisterCommand command, PasswordEncoder passwordEncoder) {
         return Member.builder()
                      .email(new Email(command.email()))
                      .nickname(command.nickname())
