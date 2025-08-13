@@ -1,6 +1,6 @@
 package tobyspring.splearn.application.provided;
 
-import java.lang.reflect.Member;
+import tobyspring.splearn.domain.Member;
 import tobyspring.splearn.domain.MemberRegisterCommand;
 
 /**
