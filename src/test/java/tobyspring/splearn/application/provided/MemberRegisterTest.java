@@ -52,12 +52,12 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
 
     @Test
     void memberRegisterCommandTestFail() {
-        extracted(new MemberRegisterCommand("jypark@splearn.app", "Jiyo", "longsecret"));
-        extracted(new MemberRegisterCommand("jypark@splearn.app", "Jiyong_______________", "longsecret"));
-        extracted(new MemberRegisterCommand("jyparksplearn.app", "Jiyong", "longsecret"));
+        checkValidation(new MemberRegisterCommand("jypark@splearn.app", "Jiyo", "longsecret"));
+        checkValidation(new MemberRegisterCommand("jypark@splearn.app", "Jiyong_______________", "longsecret"));
+        checkValidation(new MemberRegisterCommand("jyparksplearn.app", "Jiyong", "longsecret"));
     }
 
-    public void extracted(MemberRegisterCommand invalid) {
+    public void checkValidation(MemberRegisterCommand invalid) {
         assertThatThrownBy(() -> memberRegister.register(invalid))
             .isInstanceOf(ConstraintViolationException.class);
     }
