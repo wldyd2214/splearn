@@ -25,6 +25,8 @@ public class Member extends AbstractEntity {
 
     private MemberStatus status;
 
+    private MemberDetail detail;
+
     @Builder(access = AccessLevel.PRIVATE)
     private Member(Email email, String nickname, String passwordHash) {
         this.email = requireNonNull(email);
