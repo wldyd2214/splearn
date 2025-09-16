@@ -1,5 +1,8 @@
 package tobyspring.splearn.domain;
 
+import tobyspring.splearn.domain.member.MemberRegisterCommand;
+import tobyspring.splearn.domain.member.PasswordEncoder;
+
 public class MemberFixture {
 
     public static MemberRegisterCommand createMemberRegisterCommand(String email) {
