@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.member.DuplicateEmailException;
+import tobyspring.splearn.domain.member.DuplicateProfileException;
 import tobyspring.splearn.domain.member.Member;
 import tobyspring.splearn.domain.member.MemberFixture;
 import tobyspring.splearn.domain.member.MemberInfoUpdateRequest;
@@ -80,6 +81,37 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
     }
 
     @Test
+    void updateInfoFail() {
+        Member member = registerMember();
+        memberRegister.activate(member.getId());
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("Peter", "toby1234", "자기소개"));
+
+        Member member2 = registerMember("toby2@splearn.app");
+        memberRegister.activate(member2.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        // member2는 기존의 member와 같은 profile을 사용할 수 없다
+        assertThatThrownBy(() -> {
+            memberRegister.updateInfo(member2.getId(), new MemberInfoUpdateRequest("James", "toby1234", "Introduction"));
+        }).isInstanceOf(DuplicateProfileException.class);
+
+        // 다른 프로필 주소로는 변경 가능
+        memberRegister.updateInfo(member2.getId(), new MemberInfoUpdateRequest("James", "toby12345", "Introduction"));
+
+        // 기존 프로필 주소로 바꾸는 것도 가능
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("James", "toby1234", "Introduction"));
+
+        // 프로필 주소를 제거하는 것도 가능
+        memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("James", "", "Introduction"));
+
+        // 프로필 주소 중복은 허용하지 않음
+        assertThatThrownBy(() -> {
+            memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("James", "toby12345", "Introduction"));
+        }).isInstanceOf(DuplicateProfileException.class);
+    }
+
+    @Test
     void memberRegisterCommandTestFail() {
         checkValidation(new MemberRegisterCommand("jypark@splearn.app", "Jiyo", "longsecret"));
         checkValidation(new MemberRegisterCommand("jypark@splearn.app", "Jiyong_______________", "longsecret"));
@@ -95,7 +127,13 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
         Member member = memberRegister.register(MemberFixture.createMemberRegisterCommand());
         entityManager.flush();
         entityManager.clear();
+        return member;
+    }
 
+    private Member registerMember(String email) {
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterCommand(email));
+        entityManager.flush();
+        entityManager.clear();
         return member;
     }
 }
