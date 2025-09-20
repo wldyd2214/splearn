@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -13,6 +14,7 @@ import tobyspring.splearn.SplearnTestConfiguration;
 import tobyspring.splearn.domain.member.DuplicateEmailException;
 import tobyspring.splearn.domain.member.Member;
 import tobyspring.splearn.domain.member.MemberFixture;
+import tobyspring.splearn.domain.member.MemberInfoUpdateRequest;
 import tobyspring.splearn.domain.member.MemberRegisterCommand;
 import tobyspring.splearn.domain.member.MemberStatus;
 
@@ -42,14 +44,39 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
 
     @Test
     void activate() {
-        Member member = memberRegister.register(MemberFixture.createMemberRegisterCommand());
-        entityManager.flush();
-        entityManager.clear();
+        Member member = registerMember();
 
         member = memberRegister.activate(member.getId());
         entityManager.flush();
 
         assertThat(member.getStatus()).isEqualTo(MemberStatus.ACTIVE);
+    }
+
+    @Test
+    void deactivate() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        member = memberRegister.deactivate(member.getId());
+
+        assertThat(member.getStatus()).isEqualTo(MemberStatus.DEACTIVATE);
+        assertThat(member.getDetail().getDeactivatedAt()).isNotNull();
+    }
+
+    @Test
+    void updateInfo() {
+        Member member = registerMember();
+
+        memberRegister.activate(member.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        member = memberRegister.updateInfo(member.getId(), new MemberInfoUpdateRequest("Peter", "toby1234", "자기소개"));
+
+        assertThat(member.getDetail().getProfile().address()).isEqualTo("toby1234");
     }
 
     @Test
@@ -62,5 +89,13 @@ record MemberRegisterTest(MemberRegister memberRegister, EntityManager entityMan
     public void checkValidation(MemberRegisterCommand invalid) {
         assertThatThrownBy(() -> memberRegister.register(invalid))
             .isInstanceOf(ConstraintViolationException.class);
+    }
+
+    private Member registerMember() {
+        Member member = memberRegister.register(MemberFixture.createMemberRegisterCommand());
+        entityManager.flush();
+        entityManager.clear();
+
+        return member;
     }
 }
